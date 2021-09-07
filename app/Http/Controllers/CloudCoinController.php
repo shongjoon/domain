@@ -9,6 +9,17 @@ class CloudCoinController extends Controller
 {
     public function getCoins() 
     {
+
+        $test = Cloud_coin::groupBy('account')
+        ->selectRaw('*,sum(account_coin) as coin')
+        ->get();
+        foreach ($test as $key => $value) {
+            
+        }
+        // $input_count = $test->countBy('account'); // 입력횟수 
+        // return response()->json($input_count);
+
+        return response()->json($test);
         $account_coin = Cloud_coin::groupBy('account')
             ->selectRaw('*,sum(account_coin) as coin' )
             ->get();

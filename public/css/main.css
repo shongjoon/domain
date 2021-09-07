@@ -548,10 +548,10 @@ li.activeclass {
 /*========= 4.HOME =======*/
 .content {
     margin-left: 248px;
-    padding-top: 80px;
+    padding-top: 70px;
     padding-bottom: 100px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 .home_header:before{
     position: absolute;

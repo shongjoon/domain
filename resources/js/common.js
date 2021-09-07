@@ -6,6 +6,7 @@ export default {
     },
     methods: {
         async callApi(method, url, dataobj) {
+            console.log('callApi in');
             try {
                 return await axios({
                     method: method,
@@ -22,7 +23,7 @@ export default {
                 desc: desc
             });
         },
-        s(desc, title="great") {
+        s(desc, title ="success") {
             this.$Notice.success({
                 title: title,
                 desc: desc

@@ -48,41 +48,20 @@
                 </table>
             </div>
         </div>
-        <div
-            class="
-                _1adminOverveiw_table_recent
-                _box_shadow
-                _border_radious
-                _mar_b30
-                _p20
-            "
-        >
-            <p class="_title0">
-                만료 임박 도메인
-            </p>
-
-            <div class="_overflow _table_div">
-                <table class="_table">
-                    <!-- TABLE TITLE -->
-                    <tr>
-                        <th>Id</th>
-                        <th>Tag name</th>
-                        <th>Created at</th>
-                        <th>Action</th>
-                    </tr>
-                    <!-- TABLE TITLE -->
-
-                    <!-- ITEMS -->
-                    <tr>
-                        <td>test</td>
-                        <td>test</td>
-                        <td>test</td>
-                        <td>test</td>
-                    </tr>
-                    <!-- ITEMS -->
-                </table>
+        <div>
+            <div class="table_header">
+                만료 임박 도메인 {{ expire_date.length }}
             </div>
+            <Table border :columns="columns5" :data="nowData"></Table>
+            <Page
+                :total="expire_date.length"
+                :pageSize="pageSize"
+                @on-change="changePage"
+                @on-page-size-change="_nowPageSize"
+                simple
+            />
         </div>
+
         <Modal
             v-model="addModal"
             title="add tag"
@@ -138,11 +117,70 @@
 table._table tr td {
     text-align: center;
 }
+.table_header {
+    background: #afd2b5;
+    padding: 10px;
+}
 </style>
 <script>
 export default {
     data() {
         return {
+            columns5: [
+                {
+                    title: "site",
+                    key: "site",
+                    sortable: true,
+                    width: 100
+                    
+                },
+                {
+                    title: "name",
+                    key: "name",
+                    sortable: true,
+                },
+                {
+                    title: "get_id",
+                    key: "get_id",
+                    sortable: true,
+                },
+                {
+                    title: "status",
+                    key: "status",
+                    sortable: true,
+                    width: 100
+                },
+                {
+                    title: "security_level",
+                    key: "security_level",
+                    sortable: true,
+                    width: 100
+                },
+                {
+                    title: "ssl",
+                    key: "ssl_setting",
+                    sortable: true,
+                    width: 100
+                },
+                {
+                    title: "ipv6",
+                    key: "ipv6",
+                    sortable: true,
+                    width: 70
+                },
+                {
+                    title: "created_at",
+                    key: "created_at",
+                    sortable: true,
+                },
+                {
+                    title: "expire_date",
+                    key: "expire_date",
+                    sortable: true,
+                    sortType: "desc",
+                },
+            ],
+
             data: {
                 memo: "",
             },
@@ -153,11 +191,26 @@ export default {
             editModal: false,
             deleteModal: false,
             memos: [],
-            deleteId : 0
+            nowData: [],
+            pageSize: 15,
+            expire_date: [],
+            // pageCurrent: 1,
         };
     },
 
     methods: {
+        changePage(index) {
+            let _start = (index - 1) * this.pageSize;
+            let _end = index * this.pageSize;
+            // this.pageCurrent = index;
+            this.nowData = this.expire_date.slice(_start, _end);
+        },
+        _nowPageSize(index) {
+            console.log("_nowPageSize");
+            //Get the current number of items that need to be displayed in real time
+            this.pageSize = index;
+        },
+
         async addMemo() {
             if (this.data.memo.trim() == "")
                 return this.e("tag name is required");
@@ -204,35 +257,44 @@ export default {
             }
         },
         async deleteTag() {
-            const res = await this.callApi('post', 'app/delete_memo', this.deleteData)
-            if(res.status === 200) {
-                this.memos.splice(this.deleteId, 1)
-                this.s('deleted success')
-                this.deleteModal = false
-            }else{
-                this.swr()
+            const res = await this.callApi(
+                "post",
+                "app/delete_memo",
+                this.deleteData
+            );
+            if (res.status === 200) {
+                this.memos.splice(this.deleteId, 1);
+                this.s("deleted success");
+                this.deleteModal = false;
+            } else {
+                this.swr();
             }
         },
         showEditModal(memo) {
-            this.editData = memo
-            this.editModal = true
+            this.editData = memo;
+            this.editModal = true;
         },
         showDeleteModal(memo, i) {
-            this.deleteModal = true
-            this.deleteId = i
-            this.deleteData = memo
+            this.deleteModal = true;
+            this.deleteId = i;
+            this.deleteData = memo;
         },
     },
 
     async created() {
         const res = await this.callApi("get", "app/get_memos");
-        console.log(res);
         if (res.status === 200) {
             this.memos = res.data;
         } else {
             this.swr();
         }
-        
+        const expire_date = await this.callApi("get", "app/get_domain");
+        if (expire_date.status === 200) {
+            this.expire_date = expire_date.data;
+            this.nowData = this.expire_date.slice(0, this.pageSize);
+        } else {
+            this.swr();
+        }
     },
 };
 </script>
